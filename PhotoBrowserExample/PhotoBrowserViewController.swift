@@ -8,13 +8,19 @@
 import UIKit
 
 class PhotoBrowserViewController: UIViewController {
-    @IBOutlet weak private var photoImageView: AsyncImageView!
+    @IBOutlet weak private var navBar: UINavigationBar!
+    @IBOutlet weak private var containerView: UIView!
+    @IBOutlet weak private var bottomToolbar: UIToolbar!
 
-    init(imagePath: String) {
+    private let content: [PhotoPageContentRepresentable]
+    private let pagingViewController: PhotoPagingViewController
+
+    init(content: [PhotoPageContentRepresentable]) {
+        self.content = content
+        self.pagingViewController = PhotoPagingViewController()
+        self.pagingViewController.content = content
+
         super.init(nibName: "PhotoBrowserViewController", bundle: nil)
-
-        loadViewIfNeeded()
-        photoImageView.updateImage(fromURLString: imagePath)
     }
 
     required init?(coder: NSCoder) {
@@ -24,7 +30,14 @@ class PhotoBrowserViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
 
-        
+        let childVC = pagingViewController
+        addChild(childVC)
+        //Or, you could add auto layout constraint instead of relying on AutoResizing contraints
+        childVC.view.autoresizingMask = [.flexibleHeight, .flexibleWidth]
+        childVC.view.frame = containerView.bounds
+
+        containerView.addSubview(childVC.view)
+        childVC.didMove(toParent: self)
     }
 
 
@@ -32,13 +45,4 @@ class PhotoBrowserViewController: UIViewController {
         dismiss(animated: true, completion: nil)
     }
 
-}
-
-// MARK: - Zooming
-
-extension PhotoBrowserViewController: UIScrollViewDelegate {
-
-    func viewForZooming(in scrollView: UIScrollView) -> UIView? {
-        return photoImageView
-    }
 }
