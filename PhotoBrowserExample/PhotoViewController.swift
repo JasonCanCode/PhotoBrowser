@@ -9,6 +9,7 @@ import UIKit
 
 class PhotoViewController: UIViewController {
     @IBOutlet weak private(set) var photoImageView: AsyncImageView!
+    @IBOutlet weak private(set) var scrollView: UIScrollView!
 
     init(imagePath: String, placeholderImage: UIImage? = nil) {
         super.init(nibName: "PhotoViewController", bundle: nil)

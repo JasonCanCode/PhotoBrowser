@@ -9,11 +9,13 @@ import UIKit
 
 class PhotoBrowserViewController: UIViewController {
     @IBOutlet weak private var navBar: UINavigationBar!
+    @IBOutlet weak private(set) var scrollView: UIScrollView!
     @IBOutlet weak private var containerView: UIView!
     @IBOutlet weak private var bottomToolbar: UIToolbar!
 
     private let content: [PhotoPageContentRepresentable]
     private let pagingViewController: PhotoPagingViewController
+    private var currentPageIndex = 0
 
     init(content: [PhotoPageContentRepresentable]) {
         self.content = content
@@ -45,4 +47,32 @@ class PhotoBrowserViewController: UIViewController {
         dismiss(animated: true, completion: nil)
     }
 
+}
+
+extension PhotoBrowserViewController: PageContainerDelegate {
+    func switchedPage(to index: Int, isLastPage: Bool) {
+        currentPageIndex = index
+        let pageVCs = pagingViewController.orderedViewControllers
+
+        guard index < pageVCs.count else {
+            return
+        }
+        let photoVC = pageVCs[index] as? PhotoViewController
+        photoVC?.scrollView.delegate = self
+    }
+}
+
+// MARK: - Zooming
+
+extension PhotoBrowserViewController: UIScrollViewDelegate {
+
+    func viewForZooming(in scrollView: UIScrollView) -> UIView? {
+        let pageVCs = pagingViewController.orderedViewControllers
+
+        guard currentPageIndex < pageVCs.count else {
+            return nil
+        }
+        let photoVC = pageVCs[currentPageIndex] as? PhotoViewController
+        return photoVC?.viewForZooming(in: scrollView)
+    }
 }
