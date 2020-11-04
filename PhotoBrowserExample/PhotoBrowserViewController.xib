@@ -11,8 +11,9 @@
         <placeholder placeholderIdentifier="IBFilesOwner" id="-1" userLabel="File's Owner" customClass="PhotoBrowserViewController" customModule="PhotoBrowserExample" customModuleProvider="target">
             <connections>
                 <outlet property="bottomToolbar" destination="jxx-C4-MlV" id="R37-Gf-q0Q"/>
-                <outlet property="navBar" destination="LGs-TL-p8H" id="KHz-pg-CYw"/>
+                <outlet property="headerView" destination="hla-Ph-65d" id="Vtq-Lm-sog"/>
                 <outlet property="scrollView" destination="8fX-fh-nGZ" id="oxT-ZI-flq"/>
+                <outlet property="titleLabel" destination="pZ8-5E-jFd" id="0JX-c1-Sy2"/>
                 <outlet property="view" destination="i5M-Pr-FkT" id="sfx-zR-JGt"/>
             </connections>
         </placeholder>
@@ -27,18 +28,53 @@
                         <outlet property="delegate" destination="-1" id="oUI-QV-vXm"/>
                     </connections>
                 </scrollView>
-                <navigationBar contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="QBb-T4-8hu">
-                    <rect key="frame" x="0.0" y="44" width="414" height="44"/>
-                    <items>
-                        <navigationItem title="1 of 1" id="LGs-TL-p8H">
-                            <barButtonItem key="leftBarButtonItem" title="Close" id="Dt2-oq-73R">
-                                <connections>
-                                    <action selector="close" destination="-1" id="LU9-lS-FRF"/>
-                                </connections>
-                            </barButtonItem>
-                        </navigationItem>
-                    </items>
-                </navigationBar>
+                <view clipsSubviews="YES" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="hla-Ph-65d">
+                    <rect key="frame" x="0.0" y="0.0" width="414" height="88"/>
+                    <subviews>
+                        <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="2nb-un-PCd">
+                            <rect key="frame" x="0.0" y="44" width="414" height="44"/>
+                            <subviews>
+                                <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="1 of 1" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="pZ8-5E-jFd">
+                                    <rect key="frame" x="187.5" y="11.5" width="39" height="21"/>
+                                    <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                                    <nil key="textColor"/>
+                                    <nil key="highlightedColor"/>
+                                </label>
+                                <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="YHF-Pj-eX6">
+                                    <rect key="frame" x="16" y="7" width="39" height="30"/>
+                                    <state key="normal" title="Close"/>
+                                    <connections>
+                                        <action selector="close" destination="-1" eventType="touchUpInside" id="Nxb-bF-BGL"/>
+                                    </connections>
+                                </button>
+                            </subviews>
+                            <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                            <constraints>
+                                <constraint firstItem="YHF-Pj-eX6" firstAttribute="leading" secondItem="2nb-un-PCd" secondAttribute="leadingMargin" constant="8" id="6ii-OR-xbO"/>
+                                <constraint firstItem="YHF-Pj-eX6" firstAttribute="centerY" secondItem="2nb-un-PCd" secondAttribute="centerY" id="KHX-mh-vmO"/>
+                                <constraint firstItem="pZ8-5E-jFd" firstAttribute="centerX" secondItem="2nb-un-PCd" secondAttribute="centerX" id="KRI-gv-QWL"/>
+                                <constraint firstItem="pZ8-5E-jFd" firstAttribute="leading" relation="greaterThanOrEqual" secondItem="YHF-Pj-eX6" secondAttribute="trailing" constant="8" id="U3k-67-AIZ"/>
+                                <constraint firstItem="pZ8-5E-jFd" firstAttribute="centerY" secondItem="2nb-un-PCd" secondAttribute="centerY" id="UyA-Me-gsa"/>
+                            </constraints>
+                        </view>
+                        <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="Rdh-7g-hiW">
+                            <rect key="frame" x="0.0" y="87.5" width="414" height="0.5"/>
+                            <color key="backgroundColor" systemColor="systemGrayColor"/>
+                            <constraints>
+                                <constraint firstAttribute="height" constant="0.5" id="r6j-KX-zFb"/>
+                            </constraints>
+                        </view>
+                    </subviews>
+                    <color key="backgroundColor" systemColor="systemBackgroundColor"/>
+                    <constraints>
+                        <constraint firstAttribute="bottom" secondItem="Rdh-7g-hiW" secondAttribute="bottom" id="WbJ-Oc-jAJ"/>
+                        <constraint firstAttribute="trailing" secondItem="2nb-un-PCd" secondAttribute="trailing" id="dO1-bR-fL7"/>
+                        <constraint firstItem="Rdh-7g-hiW" firstAttribute="leading" secondItem="hla-Ph-65d" secondAttribute="leading" id="dl5-55-Voa"/>
+                        <constraint firstAttribute="bottom" secondItem="2nb-un-PCd" secondAttribute="bottom" id="e9a-51-0ec"/>
+                        <constraint firstAttribute="trailing" secondItem="Rdh-7g-hiW" secondAttribute="trailing" id="rJp-GA-edh"/>
+                        <constraint firstItem="2nb-un-PCd" firstAttribute="leading" secondItem="hla-Ph-65d" secondAttribute="leading" id="vp5-YC-daW"/>
+                    </constraints>
+                </view>
                 <toolbar opaque="NO" clearsContextBeforeDrawing="NO" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="jxx-C4-MlV">
                     <rect key="frame" x="0.0" y="813" width="414" height="49"/>
                     <items>
@@ -48,24 +84,38 @@
             </subviews>
             <viewLayoutGuide key="safeArea" id="fnl-2z-Ty3"/>
             <color key="backgroundColor" systemColor="systemBackgroundColor"/>
+            <gestureRecognizers/>
             <constraints>
+                <constraint firstItem="hla-Ph-65d" firstAttribute="bottom" secondItem="fnl-2z-Ty3" secondAttribute="top" constant="44" id="1QG-cq-2iJ"/>
                 <constraint firstItem="8fX-fh-nGZ" firstAttribute="centerY" secondItem="i5M-Pr-FkT" secondAttribute="centerY" id="3KH-bs-2nd"/>
-                <constraint firstItem="QBb-T4-8hu" firstAttribute="leading" secondItem="i5M-Pr-FkT" secondAttribute="leading" id="3Md-sf-e76"/>
+                <constraint firstItem="fnl-2z-Ty3" firstAttribute="top" secondItem="2nb-un-PCd" secondAttribute="top" id="D7a-YQ-w2W"/>
+                <constraint firstItem="hla-Ph-65d" firstAttribute="leading" secondItem="fnl-2z-Ty3" secondAttribute="leading" id="E5g-SO-K24"/>
                 <constraint firstItem="jxx-C4-MlV" firstAttribute="leading" secondItem="i5M-Pr-FkT" secondAttribute="leading" id="HNy-G3-KWo"/>
                 <constraint firstItem="8fX-fh-nGZ" firstAttribute="height" secondItem="i5M-Pr-FkT" secondAttribute="height" id="IEH-pA-ul5"/>
-                <constraint firstItem="QBb-T4-8hu" firstAttribute="top" secondItem="fnl-2z-Ty3" secondAttribute="top" id="La1-Gw-Kd8"/>
-                <constraint firstItem="fnl-2z-Ty3" firstAttribute="trailing" secondItem="QBb-T4-8hu" secondAttribute="trailing" id="Pan-Ou-JDS"/>
                 <constraint firstItem="8fX-fh-nGZ" firstAttribute="width" secondItem="i5M-Pr-FkT" secondAttribute="width" id="SGR-en-efV"/>
+                <constraint firstItem="fnl-2z-Ty3" firstAttribute="trailing" secondItem="hla-Ph-65d" secondAttribute="trailing" id="TY4-Kc-OLC"/>
                 <constraint firstItem="fnl-2z-Ty3" firstAttribute="trailing" secondItem="jxx-C4-MlV" secondAttribute="trailing" id="XF5-wv-AWD"/>
+                <constraint firstItem="hla-Ph-65d" firstAttribute="top" secondItem="i5M-Pr-FkT" secondAttribute="top" id="fV7-YR-4c8"/>
                 <constraint firstItem="fnl-2z-Ty3" firstAttribute="bottom" secondItem="jxx-C4-MlV" secondAttribute="bottom" id="sPc-TS-EzS"/>
                 <constraint firstItem="8fX-fh-nGZ" firstAttribute="centerX" secondItem="i5M-Pr-FkT" secondAttribute="centerX" id="urn-H6-K9H"/>
             </constraints>
+            <connections>
+                <outletCollection property="gestureRecognizers" destination="ILb-n9-Mw1" appends="YES" id="ncJ-iI-raV"/>
+            </connections>
             <point key="canvasLocation" x="2.8985507246376816" y="73.660714285714278"/>
         </view>
+        <tapGestureRecognizer id="ILb-n9-Mw1">
+            <connections>
+                <action selector="viewTapped:" destination="-1" id="Dlb-8h-loU"/>
+            </connections>
+        </tapGestureRecognizer>
     </objects>
     <resources>
         <systemColor name="systemBackgroundColor">
             <color white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+        </systemColor>
+        <systemColor name="systemGrayColor">
+            <color red="0.55686274509803924" green="0.55686274509803924" blue="0.57647058823529407" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
         </systemColor>
     </resources>
 </document>

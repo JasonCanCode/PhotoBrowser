@@ -13,13 +13,16 @@ private enum BrowserMode {
 }
 
 open class PhotoBrowserViewController: UIViewController {
-    @IBOutlet weak public private(set) var navBar: UINavigationItem!
+    @IBOutlet weak public private(set) var headerView: UIView!
+    @IBOutlet weak public private(set) var titleLabel: UILabel!
     @IBOutlet weak public private(set) var scrollView: UIScrollView!
     @IBOutlet weak public private(set) var bottomToolbar: UIToolbar!
 
     private let content: [PhotoPageContentRepresentable]
     private let photoViews: [AsyncImageView]
     private var mode: BrowserMode = .zoom
+    /// To prevent overlapping tool bar fade animations
+    private var isTransitioningBars: Bool = false
     public private(set) var currentPageIndex: Int {
         didSet {
             updateTitle()
@@ -68,9 +71,9 @@ open class PhotoBrowserViewController: UIViewController {
         update(mode: .paging)
     }
     
-    // MARK: - Actions
+    // MARK: - Updating
     
-    public func updateCurrentIndex(to index: Int) {
+    open func updateCurrentIndex(to index: Int) {
         guard index < content.count else {
             return
         }
@@ -78,14 +81,9 @@ open class PhotoBrowserViewController: UIViewController {
         configurePagingMode()
     }
     
-    @IBAction private func close() {
-        dismiss(animated: true, completion: nil)
-    }
-    
-    // MARK: - Configuration
-    
-    private func updateTitle() {
-        navBar.title = "\(currentPageIndex + 1) of \(content.count)"
+    open func updateTitle() {
+        titleLabel.text = "\(currentPageIndex + 1) of \(content.count)"
+        updateToolBars(shouldShow: true, delay: 0.25)
     }
     
     private func update(mode: BrowserMode) {
@@ -101,6 +99,34 @@ open class PhotoBrowserViewController: UIViewController {
         }
     }
     
+    private func updateToolBars(shouldShow: Bool, delay: TimeInterval = 0) {
+        guard !isTransitioningBars else {
+            return
+        }
+        isTransitioningBars = true
+        
+        UIView.animate(withDuration: 0.25, delay: delay, animations: { [weak self] in
+            let alpha: CGFloat = shouldShow ? 1 : 0
+            self?.bottomToolbar.alpha = alpha
+            self?.headerView.alpha = alpha
+        }, completion: { [weak self]  _ in
+            self?.isTransitioningBars = false
+        })
+    }
+    
+    // MARK: - Actions
+    
+    @IBAction func viewTapped(_ sender: UITapGestureRecognizer) {
+        let shouldShow = headerView.alpha == 1 ? false : true
+        updateToolBars(shouldShow: shouldShow)
+    }
+    
+    @IBAction open func close() {
+        dismiss(animated: true, completion: nil)
+    }
+    
+    // MARK: - Configuration
+    
     private func configureZoomMode() {
         let frame = scrollView.frame
         
@@ -110,6 +136,8 @@ open class PhotoBrowserViewController: UIViewController {
         
         resetScrollViewContent()
         currentPhotoView?.frame = frame
+        
+        updateToolBars(shouldShow: false)
     }
     
     private func configurePagingMode() {
