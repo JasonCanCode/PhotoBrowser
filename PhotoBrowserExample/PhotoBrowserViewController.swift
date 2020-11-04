@@ -91,15 +91,19 @@ open class PhotoBrowserViewController: UIViewController {
     }
     
     private func update(mode: BrowserMode) {
-        if self.mode != mode {
-            self.mode = mode
-            
-            switch mode {
-            case .paging:
+        guard self.mode != mode else {
+            return
+        }
+        
+        switch mode {
+        case .paging:
+            if !scrollView.isZooming, scrollView.zoomScale == 1 {
                 configurePagingMode()
-            case .zoom:
-                configureZoomMode()
+                self.mode = mode
             }
+        case .zoom:
+            configureZoomMode()
+            self.mode = mode
         }
     }
     
@@ -125,6 +129,15 @@ open class PhotoBrowserViewController: UIViewController {
         updateToolBars(shouldShow: shouldShow)
     }
     
+    @IBAction func viewDoubleTapped(_ sender: UITapGestureRecognizer) {
+        if scrollView.zoomScale == 1 {
+            update(mode: .zoom)
+            scrollView.setZoomScale(2.5, animated: true)
+        } else {
+            resetZoom()
+        }
+    }
+    
     @IBAction open func close() {
         dismiss(animated: true, completion: nil)
     }
@@ -145,6 +158,9 @@ open class PhotoBrowserViewController: UIViewController {
     }
     
     private func configurePagingMode() {
+        guard !scrollView.isZooming, scrollView.zoomScale == 1 else {
+            return
+        }
         let width = scrollView.frame.size.width
         let height = scrollView.frame.size.height
         
@@ -157,7 +173,7 @@ open class PhotoBrowserViewController: UIViewController {
         for (i, imageView) in photoViews.enumerated() {
             imageView.frame = CGRect(x: width * CGFloat(i), y: 0, width: width, height: height)
             
-            if !scrollView.subviews.contains(imageView) {
+            if imageView != currentPhotoView {
                 scrollView.addSubview(imageView)
             }
         }
@@ -196,10 +212,17 @@ extension PhotoBrowserViewController: UIScrollViewDelegate {
     // MARK: - Paging
     
     public func scrollViewDidEndDecelerating(_ scrollView: UIScrollView) {
-        let isPagingMode = scrollView.subviews.count > 1
-        let newIndex = Int(round(scrollView.contentOffset.x / scrollView.frame.width))
+        let isPaging = scrollView.subviews.count > 1 && mode == .paging
+        var newIndex = currentPageIndex
         
-        if isPagingMode, newIndex == currentPageIndex - 1 || newIndex == currentPageIndex + 1 {
+        for (i, photoView) in photoViews.enumerated() {
+            if scrollView.contentOffset == photoView.frame.origin {
+                newIndex = i
+                break
+            }
+        }
+        
+        if isPaging, newIndex == currentPageIndex - 1 || newIndex == currentPageIndex + 1 {
             currentPageIndex = newIndex
         }
     }
@@ -207,29 +230,36 @@ extension PhotoBrowserViewController: UIScrollViewDelegate {
     // MARK: - Zooming
     
     public func viewForZooming(in scrollView: UIScrollView) -> UIView? {
-//        update(mode: .zoom)
         return currentPhotoView
     }
     
     public func scrollViewWillBeginZooming(_ scrollView: UIScrollView, with view: UIView?) {
-            guard view == currentPhotoView else {
-                return
-            }
-            update(mode: .zoom)
+        guard view == currentPhotoView else {
+            return
         }
+        update(mode: .zoom)
+    }
     
     public func scrollViewDidZoom(_ scrollView: UIScrollView) {
         if scrollView.zoomScale < 1 {
-            scrollView.isUserInteractionEnabled = false
+            resetZoom()
         }
     }
     
     public func scrollViewDidEndZooming(_ scrollView: UIScrollView, with view: UIView?, atScale scale: CGFloat) {
-        if scale == 1, !scrollView.isTracking, !scrollView.isZooming, !scrollView.isDragging, !scrollView.isDecelerating {
-            update(mode: .paging)
-        } else if 1...1.25 ~= scale {
-            scrollView.setZoomScale(1, animated: true)
-            scrollView.isUserInteractionEnabled = true
+        update(mode: .paging)
+    }
+    
+    private func resetZoom() {
+        let viewFrame = self.view.frame
+        view.isUserInteractionEnabled = true
+        
+        UIView.animate(withDuration: 0.25, delay: 0) { [weak self] in
+            self?.currentPhotoView?.bounds = viewFrame
+            self?.scrollView.setZoomScale(1, animated: false)
+        } completion: { [weak self] _ in
+            self?.view.isUserInteractionEnabled = false
+            self?.update(mode: .paging)
         }
     }
 }

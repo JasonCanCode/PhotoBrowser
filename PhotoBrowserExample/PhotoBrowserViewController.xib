@@ -101,12 +101,18 @@
             </constraints>
             <connections>
                 <outletCollection property="gestureRecognizers" destination="ILb-n9-Mw1" appends="YES" id="ncJ-iI-raV"/>
+                <outletCollection property="gestureRecognizers" destination="5dS-QG-kOp" appends="YES" id="Zcw-WV-gtm"/>
             </connections>
             <point key="canvasLocation" x="2.8985507246376816" y="73.660714285714278"/>
         </view>
         <tapGestureRecognizer id="ILb-n9-Mw1">
             <connections>
                 <action selector="viewTapped:" destination="-1" id="Dlb-8h-loU"/>
+            </connections>
+        </tapGestureRecognizer>
+        <tapGestureRecognizer numberOfTapsRequired="2" id="5dS-QG-kOp" userLabel="Double Tap Gesture Recognizer">
+            <connections>
+                <action selector="viewDoubleTapped:" destination="-1" id="M5F-m3-wnh"/>
             </connections>
         </tapGestureRecognizer>
     </objects>
