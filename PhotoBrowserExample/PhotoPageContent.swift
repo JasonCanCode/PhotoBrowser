@@ -1,8 +1,8 @@
 //
-//  PhotoPagingViewController.swift
+//  PhotoPageContent.swift
 //  PhotoBrowserExample
 //
-//  Created by Jason Welch on 11/3/20.
+//  Created by Jason Welch on 11/4/20.
 //
 
 import UIKit
@@ -25,21 +25,5 @@ struct PhotoPageContent: PhotoPageContentRepresentable {
     init(imagePath: String, placeholderImage: UIImage? = nil) {
         self.imagePath = imagePath
         self.placeholderImage = placeholderImage
-    }
-}
-
-class PhotoPagingViewController: PagedContentViewController {
-    var content: [PhotoPageContentRepresentable] = [] {
-        didSet {
-            orderedViewControllers = content.map {
-                PhotoViewController(imagePath: $0.imagePath, placeholderImage: $0.placeholderImage)
-            }
-        }
-    }
-
-    var photoViewControllers: [PhotoViewController] {
-        orderedViewControllers.compactMap {
-            $0 as? PhotoViewController
-        }
     }
 }
