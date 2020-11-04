@@ -19,14 +19,13 @@ class PhotoBrowserViewController: UIViewController {
 
     private let content: [PhotoPageContentRepresentable]
     private let photoViews: [AsyncImageView]
+    private var mode: BrowserMode = .zoom
     private(set) var currentPageIndex: Int {
         didSet {
             updateTitle()
             preloadImageViews()
         }
     }
-    private var mode: BrowserMode = .zoom
-    
     
     private var currentPhotoView: AsyncImageView? {
         guard currentPageIndex < photoViews.count else {
@@ -34,7 +33,9 @@ class PhotoBrowserViewController: UIViewController {
         }
         return photoViews[currentPageIndex]
     }
-
+    
+    // MARK: - Setup
+    
     init(content: [PhotoPageContentRepresentable], startIndex: Int = 0) {
         self.content = content
         self.photoViews = content.map { _ in AsyncImageView() }
@@ -67,6 +68,8 @@ class PhotoBrowserViewController: UIViewController {
         update(mode: .paging)
     }
     
+    // MARK: - Actions
+    
     func updateCurrentIndex(to index: Int) {
         guard index < content.count else {
             return
@@ -74,6 +77,12 @@ class PhotoBrowserViewController: UIViewController {
         currentPageIndex = index
         configurePagingMode()
     }
+    
+    @IBAction private func close() {
+        dismiss(animated: true, completion: nil)
+    }
+    
+    // MARK: - Configuration
     
     private func updateTitle() {
         navBar.title = "\(currentPageIndex + 1) of \(content.count)"
@@ -146,16 +155,13 @@ class PhotoBrowserViewController: UIViewController {
             }
         }
     }
-
-    @IBAction private func close() {
-        dismiss(animated: true, completion: nil)
-    }
-
 }
 
-// MARK: - Zooming
+// MARK: - UIScrollViewDelegate
 
 extension PhotoBrowserViewController: UIScrollViewDelegate {
+    
+    // MARK: - Paging
     
     func scrollViewDidEndDecelerating(_ scrollView: UIScrollView) {
         let isPagingMode = scrollView.subviews.count > 1
@@ -165,7 +171,7 @@ extension PhotoBrowserViewController: UIScrollViewDelegate {
         }
     }
     
-    // MARK: - Zoom
+    // MARK: - Zooming
     
     func viewForZooming(in scrollView: UIScrollView) -> UIView? {
         update(mode: .zoom)
