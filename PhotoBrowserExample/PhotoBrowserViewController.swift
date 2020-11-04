@@ -24,25 +24,29 @@ open class PhotoBrowserViewController: UIViewController {
     /// To prevent overlapping tool bar fade animations
     private var isTransitioningBars: Bool = false
     public private(set) var currentPageIndex: Int {
+        willSet {
+            if newValue < photoViews.count {
+                currentPhotoView = photoViews[newValue]
+            }
+        }
         didSet {
             updateTitle()
             preloadImageViews()
         }
     }
     
-    private var currentPhotoView: AsyncImageView? {
-        guard currentPageIndex < photoViews.count else {
-            return nil
-        }
-        return photoViews[currentPageIndex]
-    }
+    private var currentPhotoView: AsyncImageView?
     
     // MARK: - Setup
     
     public init(content: [PhotoPageContentRepresentable], startIndex: Int = 0) {
+        let photoViews = content.map { _ in AsyncImageView() }
+        let index = min(startIndex, content.count - 1)
+        
         self.content = content
-        self.photoViews = content.map { _ in AsyncImageView() }
-        self.currentPageIndex = min(startIndex, content.count - 1)
+        self.photoViews = photoViews
+        self.currentPageIndex = index
+        self.currentPhotoView = photoViews[index]
 
         super.init(nibName: "PhotoBrowserViewController", bundle: nil)
     }
@@ -193,23 +197,39 @@ extension PhotoBrowserViewController: UIScrollViewDelegate {
     
     public func scrollViewDidEndDecelerating(_ scrollView: UIScrollView) {
         let isPagingMode = scrollView.subviews.count > 1
+        let newIndex = Int(round(scrollView.contentOffset.x / scrollView.frame.width))
         
-        if isPagingMode {
-            currentPageIndex = Int(round(scrollView.contentOffset.x / scrollView.frame.width))
+        if isPagingMode, newIndex == currentPageIndex - 1 || newIndex == currentPageIndex + 1 {
+            currentPageIndex = newIndex
         }
     }
     
     // MARK: - Zooming
     
     public func viewForZooming(in scrollView: UIScrollView) -> UIView? {
-        update(mode: .zoom)
+//        update(mode: .zoom)
         return currentPhotoView
     }
     
+    public func scrollViewWillBeginZooming(_ scrollView: UIScrollView, with view: UIView?) {
+            guard view == currentPhotoView else {
+                return
+            }
+            update(mode: .zoom)
+        }
+    
+    public func scrollViewDidZoom(_ scrollView: UIScrollView) {
+        if scrollView.zoomScale < 1 {
+            scrollView.isUserInteractionEnabled = false
+        }
+    }
+    
     public func scrollViewDidEndZooming(_ scrollView: UIScrollView, with view: UIView?, atScale scale: CGFloat) {
-        if scale <= 1.25 {
-            scrollView.setZoomScale(1, animated: true)
+        if scale == 1, !scrollView.isTracking, !scrollView.isZooming, !scrollView.isDragging, !scrollView.isDecelerating {
             update(mode: .paging)
+        } else if 1...1.25 ~= scale {
+            scrollView.setZoomScale(1, animated: true)
+            scrollView.isUserInteractionEnabled = true
         }
     }
 }
