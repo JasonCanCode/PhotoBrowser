@@ -48,7 +48,7 @@ open class PhotoBrowserViewController: UIViewController {
         self.currentPageIndex = index
         self.currentPhotoView = photoViews[index]
 
-        super.init(nibName: "PhotoBrowserViewController", bundle: nil)
+        super.init(nibName: "PhotoBrowserViewController", bundle: Bundle(for: type(of: self)))
     }
 
     required public init?(coder: NSCoder) {
