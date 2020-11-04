@@ -15,18 +15,19 @@ private enum BrowserMode {
 class PhotoBrowserViewController: UIViewController {
     @IBOutlet weak private var navBar: UINavigationItem!
     @IBOutlet weak private(set) var scrollView: UIScrollView!
-    @IBOutlet weak private var bottomToolbar: UIToolbar!
+    @IBOutlet weak var bottomToolbar: UIToolbar!
 
     private let content: [PhotoPageContentRepresentable]
-    private let pagingViewController: PhotoPagingViewController
+    private let photoViews: [AsyncImageView]
     private var currentPageIndex = 0 {
         didSet {
             updateTitle()
+            preloadImageViews()
         }
     }
     private var mode: BrowserMode = .zoom
     
-    private let photoViews: [AsyncImageView]
+    
     private var currentPhotoView: AsyncImageView? {
         guard currentPageIndex < photoViews.count else {
             return nil
@@ -36,15 +37,7 @@ class PhotoBrowserViewController: UIViewController {
 
     init(content: [PhotoPageContentRepresentable]) {
         self.content = content
-        self.pagingViewController = PhotoPagingViewController()
-        self.pagingViewController.content = content
-        
-        self.photoViews = content.map {
-            let view = AsyncImageView()
-            view.updateImage(fromURLString: $0.imagePath, placeholderImage: $0.placeholderImage)
-            view.contentMode = .scaleAspectFit
-            return view
-        }
+        self.photoViews = content.map { _ in AsyncImageView() }
 
         super.init(nibName: "PhotoBrowserViewController", bundle: nil)
     }
@@ -57,12 +50,18 @@ class PhotoBrowserViewController: UIViewController {
         super.viewDidLoad()
 
         scrollView.minimumZoomScale = 1
+        scrollView.frame = UIScreen.main.bounds
         updateTitle()
-        configureZoomMode()
+        
+        if let view = currentPhotoView {
+            scrollView.addSubview(view)
+            configureZoomMode()
+            preloadImageViews()
+        }
     }
     
-    override func viewDidAppear(_ animated: Bool) {
-        super.viewDidAppear(animated)
+    override func viewDidLayoutSubviews() {
+        super.viewDidLayoutSubviews()
         
         update(mode: .paging)
     }
@@ -85,35 +84,58 @@ class PhotoBrowserViewController: UIViewController {
     }
     
     private func configureZoomMode() {
-        let width = UIScreen.main.bounds.size.width
+        let frame = scrollView.frame
         
-        scrollView.frame = CGRect(x: 0, y: 0, width: width, height: view.frame.height)
-        scrollView.contentSize = CGSize(width: width, height: scrollView.frame.height)
+        scrollView.contentSize = frame.size
         scrollView.isPagingEnabled = false
         scrollView.isDirectionalLockEnabled = false
         
+        resetScrollViewContent()
+        currentPhotoView?.frame = frame
+    }
+    
+    private func configurePagingMode() {
+        let width = scrollView.frame.size.width
+        let height = scrollView.frame.size.height
+        
+        scrollView.contentSize = CGSize(width: width * CGFloat(photoViews.count), height: height)
+        scrollView.isPagingEnabled = true
+        scrollView.isDirectionalLockEnabled = true
+        
+        resetScrollViewContent()
+        
+        for (i, imageView) in photoViews.enumerated() {
+            imageView.frame = CGRect(x: width * CGFloat(i), y: 0, width: width, height: height)
+            
+            if !scrollView.subviews.contains(imageView) {
+                scrollView.addSubview(imageView)
+            }
+        }
+
+        scrollView.contentOffset = CGPoint(x: width * CGFloat(currentPageIndex), y: 0)
+    }
+    
+    private func resetScrollViewContent() {
         scrollView.subviews.forEach {
             if $0 != currentPhotoView {
                 $0.removeFromSuperview()
             }
         }
-        currentPhotoView?.frame = CGRect(x: 0, y: 0, width: width, height: scrollView.frame.height)
     }
     
-    private func configurePagingMode() {
-        let width = UIScreen.main.bounds.size.width
+    /// Load images of the visable image view and up to 2 in either direction
+    private func preloadImageViews() {
+        let firstPreloadIndex = max(0, currentPageIndex - 2)
+        let lastPreloadIndex = min(photoViews.count - 1, currentPageIndex + 2)
         
-        scrollView.frame = CGRect(x: 0, y: 0, width: width, height: view.frame.height)
-        scrollView.contentSize = CGSize(width: width * CGFloat(photoViews.count), height: scrollView.frame.height)
-        scrollView.isPagingEnabled = true
-        scrollView.isDirectionalLockEnabled = true
-        
-        for (i, imageView) in photoViews.enumerated() {
-            imageView.frame = CGRect(x: width * CGFloat(i), y: 0, width: width, height: scrollView.frame.height)
-            scrollView.addSubview(imageView)
+        for i in firstPreloadIndex...lastPreloadIndex {
+            let contentItem = content[i]
+            
+            if photoViews[i].urlString != contentItem.imagePath {
+                photoViews[i].contentMode = .scaleAspectFit
+                photoViews[i].updateImage(fromURLString: contentItem.imagePath)
+            }
         }
-        
-        scrollView.contentOffset = CGPoint(x: width * CGFloat(currentPageIndex), y: 0)
     }
 
     @IBAction private func close() {
@@ -140,10 +162,6 @@ extension PhotoBrowserViewController: UIScrollViewDelegate {
         update(mode: .zoom)
         return currentPhotoView
     }
-    
-//    func scrollViewWillBeginZooming(_ scrollView: UIScrollView, with view: UIView?) {
-//        update(mode: .zoom)
-//    }
     
     func scrollViewDidEndZooming(_ scrollView: UIScrollView, with view: UIView?, atScale scale: CGFloat) {
         if scale <= 1.25 {

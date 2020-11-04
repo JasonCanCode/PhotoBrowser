@@ -8,7 +8,7 @@
 import UIKit
 
 class AsyncImageView: UIImageView {
-    private var urlString: String?
+    private(set) var urlString: String?
 
     func updateImage(fromURLString urlString: String, placeholderImage: UIImage? = nil) {
         let placeholderImage = placeholderImage ?? self.image
