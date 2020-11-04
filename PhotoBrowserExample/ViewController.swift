@@ -23,7 +23,7 @@ class ViewController: UIViewController {
             "https://en.bcdn.biz/Images/2016/11/15/776342f0-86f5-4522-84c9-a02d6b11c766.jpg"
         ]
         let content: [PhotoPageContentRepresentable] = imagePaths.map { PhotoPageContent(imagePath: $0) }
-        let vc = PhotoBrowserViewController(content: content)
+        let vc = PhotoBrowserViewController(content: content, startIndex: 3)
         present(vc, animated: true, completion: nil)
     }
 }

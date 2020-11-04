@@ -19,7 +19,7 @@ class PhotoBrowserViewController: UIViewController {
 
     private let content: [PhotoPageContentRepresentable]
     private let photoViews: [AsyncImageView]
-    private var currentPageIndex = 0 {
+    private(set) var currentPageIndex: Int {
         didSet {
             updateTitle()
             preloadImageViews()
@@ -35,9 +35,10 @@ class PhotoBrowserViewController: UIViewController {
         return photoViews[currentPageIndex]
     }
 
-    init(content: [PhotoPageContentRepresentable]) {
+    init(content: [PhotoPageContentRepresentable], startIndex: Int = 0) {
         self.content = content
         self.photoViews = content.map { _ in AsyncImageView() }
+        self.currentPageIndex = min(startIndex, content.count - 1)
 
         super.init(nibName: "PhotoBrowserViewController", bundle: nil)
     }
@@ -64,6 +65,14 @@ class PhotoBrowserViewController: UIViewController {
         super.viewDidLayoutSubviews()
         
         update(mode: .paging)
+    }
+    
+    func updateCurrentIndex(to index: Int) {
+        guard index < content.count else {
+            return
+        }
+        currentPageIndex = index
+        configurePagingMode()
     }
     
     private func updateTitle() {
