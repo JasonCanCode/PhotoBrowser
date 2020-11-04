@@ -112,15 +112,15 @@
 				B43BB27E2551AD28002CD050 /* AppDelegate.swift */,
 				B43BB2802551AD28002CD050 /* SceneDelegate.swift */,
 				B43BB2822551AD28002CD050 /* ViewController.swift */,
-				B43BB2B82551BCD2002CD050 /* PhotoBrowserViewController.swift */,
-				CB3F10292552F24600910DB7 /* PhotoPageContent.swift */,
-				B43BB2B92551BCD2002CD050 /* PhotoBrowserViewController.xib */,
 				B43BB2842551AD28002CD050 /* Main.storyboard */,
 				B43BB2872551AD28002CD050 /* Assets.xcassets */,
 				B43BB2892551AD28002CD050 /* LaunchScreen.storyboard */,
 				B43BB28C2551AD28002CD050 /* Info.plist */,
 				B43BB2BF2551BF2E002CD050 /* AsyncImageView.swift */,
 				B43BB2C42551BF50002CD050 /* AsyncImageLoader.swift */,
+				CB3F10292552F24600910DB7 /* PhotoPageContent.swift */,
+				B43BB2B82551BCD2002CD050 /* PhotoBrowserViewController.swift */,
+				B43BB2B92551BCD2002CD050 /* PhotoBrowserViewController.xib */,
 			);
 			path = PhotoBrowserExample;
 			sourceTree = "<group>";

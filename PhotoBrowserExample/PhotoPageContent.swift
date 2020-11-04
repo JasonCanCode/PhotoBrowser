@@ -7,22 +7,22 @@
 
 import UIKit
 
-protocol PhotoPageContentRepresentable {
+public protocol PhotoPageContentRepresentable {
     var imagePath: String { get }
     var placeholderImage: UIImage? { get }
 }
 
-extension PhotoPageContentRepresentable {
+public extension PhotoPageContentRepresentable {
     var placeholderImage: UIImage? {
         return nil
     }
 }
 
-struct PhotoPageContent: PhotoPageContentRepresentable {
-    let imagePath: String
-    let placeholderImage: UIImage?
+public struct PhotoPageContent: PhotoPageContentRepresentable {
+    public let imagePath: String
+    public let placeholderImage: UIImage?
 
-    init(imagePath: String, placeholderImage: UIImage? = nil) {
+    public init(imagePath: String, placeholderImage: UIImage? = nil) {
         self.imagePath = imagePath
         self.placeholderImage = placeholderImage
     }

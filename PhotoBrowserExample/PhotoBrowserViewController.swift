@@ -12,15 +12,15 @@ private enum BrowserMode {
     case zoom
 }
 
-class PhotoBrowserViewController: UIViewController {
-    @IBOutlet weak private var navBar: UINavigationItem!
-    @IBOutlet weak private(set) var scrollView: UIScrollView!
-    @IBOutlet weak var bottomToolbar: UIToolbar!
+open class PhotoBrowserViewController: UIViewController {
+    @IBOutlet weak public private(set) var navBar: UINavigationItem!
+    @IBOutlet weak public private(set) var scrollView: UIScrollView!
+    @IBOutlet weak public private(set) var bottomToolbar: UIToolbar!
 
     private let content: [PhotoPageContentRepresentable]
     private let photoViews: [AsyncImageView]
     private var mode: BrowserMode = .zoom
-    private(set) var currentPageIndex: Int {
+    public private(set) var currentPageIndex: Int {
         didSet {
             updateTitle()
             preloadImageViews()
@@ -36,7 +36,7 @@ class PhotoBrowserViewController: UIViewController {
     
     // MARK: - Setup
     
-    init(content: [PhotoPageContentRepresentable], startIndex: Int = 0) {
+    public init(content: [PhotoPageContentRepresentable], startIndex: Int = 0) {
         self.content = content
         self.photoViews = content.map { _ in AsyncImageView() }
         self.currentPageIndex = min(startIndex, content.count - 1)
@@ -44,11 +44,11 @@ class PhotoBrowserViewController: UIViewController {
         super.init(nibName: "PhotoBrowserViewController", bundle: nil)
     }
 
-    required init?(coder: NSCoder) {
+    required public init?(coder: NSCoder) {
         return nil
     }
 
-    override func viewDidLoad() {
+    open override func viewDidLoad() {
         super.viewDidLoad()
 
         scrollView.minimumZoomScale = 1
@@ -62,7 +62,7 @@ class PhotoBrowserViewController: UIViewController {
         }
     }
     
-    override func viewDidLayoutSubviews() {
+    open override func viewDidLayoutSubviews() {
         super.viewDidLayoutSubviews()
         
         update(mode: .paging)
@@ -70,7 +70,7 @@ class PhotoBrowserViewController: UIViewController {
     
     // MARK: - Actions
     
-    func updateCurrentIndex(to index: Int) {
+    public func updateCurrentIndex(to index: Int) {
         guard index < content.count else {
             return
         }
@@ -163,7 +163,7 @@ extension PhotoBrowserViewController: UIScrollViewDelegate {
     
     // MARK: - Paging
     
-    func scrollViewDidEndDecelerating(_ scrollView: UIScrollView) {
+    public func scrollViewDidEndDecelerating(_ scrollView: UIScrollView) {
         let isPagingMode = scrollView.subviews.count > 1
         
         if isPagingMode {
@@ -173,12 +173,12 @@ extension PhotoBrowserViewController: UIScrollViewDelegate {
     
     // MARK: - Zooming
     
-    func viewForZooming(in scrollView: UIScrollView) -> UIView? {
+    public func viewForZooming(in scrollView: UIScrollView) -> UIView? {
         update(mode: .zoom)
         return currentPhotoView
     }
     
-    func scrollViewDidEndZooming(_ scrollView: UIScrollView, with view: UIView?, atScale scale: CGFloat) {
+    public func scrollViewDidEndZooming(_ scrollView: UIScrollView, with view: UIView?, atScale scale: CGFloat) {
         if scale <= 1.25 {
             scrollView.setZoomScale(1, animated: true)
             update(mode: .paging)
