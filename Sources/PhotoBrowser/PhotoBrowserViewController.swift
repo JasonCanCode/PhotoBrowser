@@ -215,10 +215,13 @@ open class PhotoBrowserViewController: UIViewController {
         
         for i in firstPreloadIndex...lastPreloadIndex {
             let contentItem = content[i]
+            let photoView = photoViews[i]
             
-            if photoViews[i].urlString != contentItem.imagePath {
+            if let image = contentItem.image {
+                photoView.image = image
+            } else if let path = contentItem.imagePath, photoViews[i].urlString != path {
                 photoViews[i].contentMode = .scaleAspectFit
-                photoViews[i].updateImage(fromURLString: contentItem.imagePath)
+                photoViews[i].updateImage(fromURLString: path)
             }
         }
     }
