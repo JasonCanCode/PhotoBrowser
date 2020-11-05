@@ -13,7 +13,11 @@ internal extension PhotoBrowserViewController {
         guard view.subviews.contains(scrollView) == false else {
             return
         }
-        view.backgroundColor = .systemBackground
+        if #available(iOS 13.0, *) {
+            view.backgroundColor = .systemBackground
+        } else {
+            view.backgroundColor = UIColor.white
+        }
         
         let tap = UITapGestureRecognizer(target: self, action: #selector(viewTapped))
         tap.numberOfTapsRequired = 1
@@ -69,7 +73,11 @@ internal extension PhotoBrowserViewController {
     
     func createHeaderView() -> UIView {
         let header = UIView(frame: CGRect(origin: .zero, size: CGSize(width: 1, height: 1)))
-        header.backgroundColor = .systemBackground
+        if #available(iOS 13.0, *) {
+            header.backgroundColor = .systemBackground
+        } else {
+            header.backgroundColor = UIColor.lightGray
+        }
         
         return header
     }
