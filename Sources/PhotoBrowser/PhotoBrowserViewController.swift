@@ -72,6 +72,11 @@ open class PhotoBrowserViewController: UIViewController {
         update(mode: .paging)
     }
     
+    open override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        updateTitle()
+    }
+    
     // MARK: - Updating
     
     open func updateCurrentIndex(to index: Int) {
