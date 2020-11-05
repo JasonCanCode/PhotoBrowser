@@ -13,17 +13,13 @@ private enum BrowserMode {
 }
 
 open class PhotoBrowserViewController: UIViewController {
-    @IBOutlet weak public private(set) var headerView: UIView!
-    @IBOutlet weak public private(set) var titleLabel: UILabel!
-    @IBOutlet weak public private(set) var scrollView: UIScrollView!
-    @IBOutlet weak public private(set) var bottomToolbar: UIToolbar!
-
-    private let content: [PhotoPageContentRepresentable]
-    private let photoViews: [AsyncImageView]
-    private var mode: BrowserMode = .zoom
-    /// To prevent overlapping tool bar fade animations
-    private var isTransitioningBars: Bool = false
-    public private(set) var currentPageIndex: Int {
+    public private(set) lazy var headerView = createHeaderView()
+    public private(set) var titleLabel = UILabel()
+    public private(set) lazy var closeButton = createCloseButton()
+    public private(set) lazy var scrollView = createScrollView()
+    public private(set) lazy var bottomToolbar = UIToolbar()
+    
+    public private(set) var currentPageIndex: Int = 0 {
         willSet {
             if newValue < photoViews.count {
                 currentPhotoView = photoViews[newValue]
@@ -34,44 +30,45 @@ open class PhotoBrowserViewController: UIViewController {
             preloadImageViews()
         }
     }
-    
+
+    private var content: [PhotoPageContentRepresentable] = [] {
+        didSet {
+            photoViews = content.map { _ in AsyncImageView() }
+        }
+    }
+    private var photoViews: [AsyncImageView] = []
     private var currentPhotoView: AsyncImageView?
+    private var mode: BrowserMode = .zoom
+    /// To prevent overlapping tool bar fade animations
+    private var isTransitioningBars: Bool = false
+    
+    private var hasNav: Bool {
+        return navigationController?.isNavigationBarHidden == false
+    }
     
     // MARK: - Setup
     
-    public init(content: [PhotoPageContentRepresentable], startIndex: Int = 0) {
-        let photoViews = content.map { _ in AsyncImageView() }
+    open func configure(content: [PhotoPageContentRepresentable], startIndex: Int = 0) {
+        guard !content.isEmpty else {
+            return
+        }
+        loadViewIfNeeded()
         let index = min(startIndex, content.count - 1)
         
         self.content = content
-        self.photoViews = photoViews
         self.currentPageIndex = index
         self.currentPhotoView = photoViews[index]
-
-        super.init(nibName: "PhotoBrowserViewController", bundle: Bundle(for: type(of: self)))
-    }
-
-    required public init?(coder: NSCoder) {
-        return nil
+        
+        configureZoomMode()
     }
 
     open override func viewDidLoad() {
         super.viewDidLoad()
-
-        scrollView.minimumZoomScale = 1
-        scrollView.frame = UIScreen.main.bounds
-        updateTitle()
-        
-        if let view = currentPhotoView {
-            scrollView.addSubview(view)
-            configureZoomMode()
-            preloadImageViews()
-        }
+        arrangeViews()
     }
     
     open override func viewDidLayoutSubviews() {
         super.viewDidLayoutSubviews()
-        
         update(mode: .paging)
     }
     
@@ -86,8 +83,16 @@ open class PhotoBrowserViewController: UIViewController {
     }
     
     open func updateTitle() {
-        titleLabel.text = "\(currentPageIndex + 1) of \(content.count)"
-        updateToolBars(shouldShow: true, delay: 0.25)
+        headerView.isHidden = hasNav
+        
+        let text = "\(currentPageIndex + 1) of \(content.count)"
+        
+        if hasNav {
+            navigationItem.title = text
+        } else {
+            titleLabel.text = text
+            updateToolBars(shouldShow: true, delay: 0.25)
+        }
     }
     
     private func update(mode: BrowserMode) {
@@ -111,12 +116,14 @@ open class PhotoBrowserViewController: UIViewController {
         guard !isTransitioningBars else {
             return
         }
+        let shouldShowHeader = shouldShow && !hasNav
+        let shouldShowFooter = shouldShow && bottomToolbar.items?.isEmpty == false
+        
         isTransitioningBars = true
         
         UIView.animate(withDuration: 0.25, delay: delay, animations: { [weak self] in
-            let alpha: CGFloat = shouldShow ? 1 : 0
-            self?.bottomToolbar.alpha = alpha
-            self?.headerView.alpha = alpha
+            self?.headerView.alpha = shouldShowHeader ? 1 : 0
+            self?.bottomToolbar.alpha = shouldShowFooter ? 1 : 0
         }, completion: { [weak self]  _ in
             self?.isTransitioningBars = false
         })
@@ -145,6 +152,9 @@ open class PhotoBrowserViewController: UIViewController {
     // MARK: - Configuration
     
     private func configureZoomMode() {
+        guard let currentPhotoView = currentPhotoView else {
+            return
+        }
         let frame = scrollView.frame
         
         scrollView.contentSize = frame.size
@@ -152,7 +162,11 @@ open class PhotoBrowserViewController: UIViewController {
         scrollView.isDirectionalLockEnabled = false
         
         resetScrollViewContent()
-        currentPhotoView?.frame = frame
+        currentPhotoView.frame = frame
+        
+        if !scrollView.subviews.contains(currentPhotoView) {
+            scrollView.addSubview(currentPhotoView)
+        }
         
         updateToolBars(shouldShow: false)
     }
@@ -173,7 +187,7 @@ open class PhotoBrowserViewController: UIViewController {
         for (i, imageView) in photoViews.enumerated() {
             imageView.frame = CGRect(x: width * CGFloat(i), y: 0, width: width, height: height)
             
-            if imageView != currentPhotoView {
+            if !scrollView.subviews.contains(imageView) {
                 scrollView.addSubview(imageView)
             }
         }
@@ -252,13 +266,13 @@ extension PhotoBrowserViewController: UIScrollViewDelegate {
     
     private func resetZoom() {
         let viewFrame = self.view.frame
-        view.isUserInteractionEnabled = true
+        view.isUserInteractionEnabled = false
         
         UIView.animate(withDuration: 0.25, delay: 0) { [weak self] in
             self?.currentPhotoView?.bounds = viewFrame
             self?.scrollView.setZoomScale(1, animated: false)
         } completion: { [weak self] _ in
-            self?.view.isUserInteractionEnabled = false
+            self?.view.isUserInteractionEnabled = true
             self?.update(mode: .paging)
         }
     }

@@ -19,7 +19,7 @@
 		CB38ADA825534ADC007612C0 /* AsyncImageLoader.swift in Sources */ = {isa = PBXBuildFile; fileRef = CB38ADA325534ADC007612C0 /* AsyncImageLoader.swift */; };
 		CB38ADA925534ADC007612C0 /* AsyncImageView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CB38ADA425534ADC007612C0 /* AsyncImageView.swift */; };
 		CB38ADAA25534ADC007612C0 /* PhotoPageContent.swift in Sources */ = {isa = PBXBuildFile; fileRef = CB38ADA525534ADC007612C0 /* PhotoPageContent.swift */; };
-		CB38ADAB25534ADC007612C0 /* PhotoBrowserViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = CB38ADA625534ADC007612C0 /* PhotoBrowserViewController.xib */; };
+		CB915787255465C200E44E3F /* PhotoBrowserViewController+Layout.swift in Sources */ = {isa = PBXBuildFile; fileRef = CB915786255465C200E44E3F /* PhotoBrowserViewController+Layout.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -58,7 +58,7 @@
 		CB38ADA325534ADC007612C0 /* AsyncImageLoader.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = AsyncImageLoader.swift; path = ../Sources/PhotoBrowser/AsyncImageLoader.swift; sourceTree = "<group>"; };
 		CB38ADA425534ADC007612C0 /* AsyncImageView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = AsyncImageView.swift; path = ../Sources/PhotoBrowser/AsyncImageView.swift; sourceTree = "<group>"; };
 		CB38ADA525534ADC007612C0 /* PhotoPageContent.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = PhotoPageContent.swift; path = ../Sources/PhotoBrowser/PhotoPageContent.swift; sourceTree = "<group>"; };
-		CB38ADA625534ADC007612C0 /* PhotoBrowserViewController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; name = PhotoBrowserViewController.xib; path = ../Sources/PhotoBrowser/PhotoBrowserViewController.xib; sourceTree = "<group>"; };
+		CB915786255465C200E44E3F /* PhotoBrowserViewController+Layout.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "PhotoBrowserViewController+Layout.swift"; path = "../Sources/PhotoBrowser/PhotoBrowserViewController+Layout.swift"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -119,7 +119,7 @@
 				CB38ADA325534ADC007612C0 /* AsyncImageLoader.swift */,
 				CB38ADA425534ADC007612C0 /* AsyncImageView.swift */,
 				CB38ADA225534ADC007612C0 /* PhotoBrowserViewController.swift */,
-				CB38ADA625534ADC007612C0 /* PhotoBrowserViewController.xib */,
+				CB915786255465C200E44E3F /* PhotoBrowserViewController+Layout.swift */,
 				CB38ADA525534ADC007612C0 /* PhotoPageContent.swift */,
 			);
 			path = PhotoBrowserExample;
@@ -246,7 +246,6 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				CB38ADAB25534ADC007612C0 /* PhotoBrowserViewController.xib in Resources */,
 				B43BB28B2551AD28002CD050 /* LaunchScreen.storyboard in Resources */,
 				B43BB2882551AD28002CD050 /* Assets.xcassets in Resources */,
 				B43BB2862551AD28002CD050 /* Main.storyboard in Resources */,
@@ -274,6 +273,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				CB915787255465C200E44E3F /* PhotoBrowserViewController+Layout.swift in Sources */,
 				CB38ADA725534ADC007612C0 /* PhotoBrowserViewController.swift in Sources */,
 				B43BB2832551AD28002CD050 /* ViewController.swift in Sources */,
 				B43BB27F2551AD28002CD050 /* AppDelegate.swift in Sources */,
