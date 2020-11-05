@@ -99,6 +99,16 @@ open class PhotoBrowserViewController: UIViewController {
             updateToolBars(shouldShow: true, delay: 0.25)
         }
     }
+
+    open func addToFooter(item: UIBarButtonItem) {
+        let hasButtons = bottomToolbar.items?.isEmpty == false
+        
+        if !hasButtons {
+            let spacer = UIBarButtonItem(barButtonSystemItem: .flexibleSpace, target: nil, action: nil)
+            bottomToolbar.items = [spacer]
+        }
+        bottomToolbar.items?.append(item)
+    }
     
     private func update(mode: BrowserMode) {
         guard self.mode != mode else {
