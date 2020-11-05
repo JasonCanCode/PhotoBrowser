@@ -36,13 +36,23 @@ public struct PhotoPageContent: PhotoPageContentRepresentable {
     public var image: UIImage?
     public let placeholderImage: UIImage?
 
-    public init?(imagePath: String? = nil, image: UIImage? = nil, placeholderImage: UIImage? = nil) {
+    public init(imagePath: String? = nil, image: UIImage? = nil, placeholderImage: UIImage? = nil) throws {
         guard Self.validate(imagePath: imagePath, image: image) else {
-            assertionFailure("Must have a imagePath path or image")
-            return nil
+            throw Err.invalid
         }
         self.imagePath = imagePath
         self.image = image
         self.placeholderImage = placeholderImage
+    }
+    
+    public enum Err: Error {
+        case invalid
+        
+        var localizedDescription: String {
+            switch self {
+            case .invalid:
+                return "Must have a imagePath path or image"
+            }
+        }
     }
 }
