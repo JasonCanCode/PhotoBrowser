@@ -243,17 +243,10 @@ extension PhotoBrowserViewController: UIScrollViewDelegate {
     
     // MARK: - Paging
     
-    public func scrollViewDidEndDecelerating(_ scrollView: UIScrollView) {
+    public func scrollViewDidScroll(_ scrollView: UIScrollView) {
         let isPaging = scrollView.subviews.count > 1 && mode == .paging
-        var newIndex = currentPageIndex
-        
-        for (i, photoView) in photoViews.enumerated() {
-            if scrollView.contentOffset == photoView.frame.origin {
-                newIndex = i
-                break
-            }
-        }
-        
+        let newIndex = Int(round(scrollView.contentOffset.x / scrollView.frame.width))
+
         if isPaging, newIndex == currentPageIndex - 1 || newIndex == currentPageIndex + 1 {
             currentPageIndex = newIndex
         }
