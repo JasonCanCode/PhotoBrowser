@@ -13,7 +13,11 @@ internal extension PhotoBrowserViewController {
         guard view.subviews.contains(scrollView) == false else {
             return
         }
-        view.backgroundColor = .systemBackground
+        if #available(iOS 13.0, *) {
+            view.backgroundColor = .systemBackground
+        } else {
+            view.backgroundColor = UIColor.white
+        }
         
         let tap = UITapGestureRecognizer(target: self, action: #selector(viewTapped))
         tap.numberOfTapsRequired = 1
@@ -25,19 +29,19 @@ internal extension PhotoBrowserViewController {
         
         view.addSubview(scrollView)
         scrollView.translatesAutoresizingMaskIntoConstraints = false
-        centerInSuperView(view: scrollView, beSafe: false)
-        constrainSizetoSuperView(view: scrollView, beSafe: false)
+        scrollView.centerInSuperView(beSafe: false)
+        scrollView.constrainSizetoSuperView(beSafe: false)
         
         view.addSubview(headerView)
         headerView.translatesAutoresizingMaskIntoConstraints = false
-        alignToSuperView(view: headerView, edges: [.left, .right, .top], beSafe: false)
+        headerView.alignToSuperView(edges: [.left, .right, .top], beSafe: false)
         headerView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 44).isActive = true
         
         headerView.addSubview(closeButton)
         closeButton.translatesAutoresizingMaskIntoConstraints = false
         closeButton.leadingAnchor.constraint(equalTo: headerView.safeAreaLayoutGuide.leadingAnchor, constant: 16).isActive = true
         closeButton.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor).isActive = true
-        alignToSuperView(view: closeButton, edges: [.bottom])
+        closeButton.alignToSuperView(edges: [.bottom])
         
         
         headerView.addSubview(titleLabel)
@@ -45,12 +49,19 @@ internal extension PhotoBrowserViewController {
         titleLabel.centerXAnchor.constraint(equalTo: headerView.centerXAnchor).isActive = true
         titleLabel.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor).isActive = true
         titleLabel.leadingAnchor.constraint(greaterThanOrEqualTo: closeButton.trailingAnchor, constant: 8).isActive = true
-        alignToSuperView(view: titleLabel, edges: [.bottom])
+        titleLabel.alignToSuperView(edges: [.bottom])
+        
+        let dividerView = UIView(frame: .zero)
+        dividerView.backgroundColor = .lightGray
+        headerView.addSubview(dividerView)
+        dividerView.translatesAutoresizingMaskIntoConstraints = false
+        dividerView.heightAnchor.constraint(equalToConstant: 0.5).isActive = true
+        dividerView.alignToSuperView(edges: [.left, .right, .bottom], beSafe: false)
         
         view.addSubview(bottomToolbar)
         bottomToolbar.translatesAutoresizingMaskIntoConstraints = false
         bottomToolbar.heightAnchor.constraint(equalToConstant: 44).isActive = true
-        alignToSuperView(view: bottomToolbar, edges: [.left, .right, .bottom])
+        bottomToolbar.alignToSuperView(edges: [.left, .right, .bottom])
         
         view.sendSubviewToBack(scrollView)
         
@@ -69,7 +80,11 @@ internal extension PhotoBrowserViewController {
     
     func createHeaderView() -> UIView {
         let header = UIView(frame: CGRect(origin: .zero, size: CGSize(width: 1, height: 1)))
-        header.backgroundColor = .systemBackground
+        if #available(iOS 13.0, *) {
+            header.backgroundColor = .systemBackground
+        } else {
+            header.backgroundColor = UIColor.lightGray
+        }
         
         return header
     }
@@ -82,72 +97,65 @@ internal extension PhotoBrowserViewController {
         
         return button
     }
+}
+
+private extension UIView {
     
-    private func alignToSuperView(view: UIView, edges: UIRectEdge, beSafe: Bool = true) {
-        guard let container = view.superview else {
+    func alignToSuperView(edges: UIRectEdge, beSafe: Bool = true) {
+        guard let container = self.superview else {
             return
         }
         
         if edges.contains(.top) || edges.contains(.all) {
             let anchor = beSafe ? container.safeAreaLayoutGuide.topAnchor : container.topAnchor
-            view.topAnchor.constraint(equalTo: anchor).isActive = true
+            self.topAnchor.constraint(equalTo: anchor).isActive = true
         }
         
         if edges.contains(.bottom) || edges.contains(.all) {
             let anchor = beSafe ? container.safeAreaLayoutGuide.bottomAnchor : container.bottomAnchor
-            view.bottomAnchor.constraint(equalTo: anchor).isActive = true
+            self.bottomAnchor.constraint(equalTo: anchor).isActive = true
         }
         
         if edges.contains(.left) || edges.contains(.all) {
             let anchor = beSafe ? container.safeAreaLayoutGuide.leadingAnchor : container.leadingAnchor
-            view.leadingAnchor.constraint(equalTo: anchor).isActive = true
+            self.leadingAnchor.constraint(equalTo: anchor).isActive = true
         }
         
         if edges.contains(.right) || edges.contains(.all) {
             let anchor = beSafe ? container.safeAreaLayoutGuide.trailingAnchor : container.trailingAnchor
-            view.trailingAnchor.constraint(equalTo: anchor).isActive = true
+            self.trailingAnchor.constraint(equalTo: anchor).isActive = true
         }
     }
     
-    private func centerInSuperView(
-        view: UIView,
-        shouldUseVertical: Bool = true,
-        shouldUseHorizontal: Bool = true,
-        beSafe: Bool = true
-    ) {
-        guard let container = view.superview else {
+    func centerInSuperView(shouldUseVertical: Bool = true, shouldUseHorizontal: Bool = true, beSafe: Bool = true) {
+        guard let container = self.superview else {
             return
         }
         
         if shouldUseVertical {
             let anchor = beSafe ? container.safeAreaLayoutGuide.centerYAnchor : container.centerYAnchor
-            view.centerYAnchor.constraint(equalTo: anchor).isActive = true
+            self.centerYAnchor.constraint(equalTo: anchor).isActive = true
         }
         
         if shouldUseHorizontal {
             let anchor = beSafe ? container.safeAreaLayoutGuide.centerXAnchor : container.centerXAnchor
-            view.centerXAnchor.constraint(equalTo: anchor).isActive = true
+            self.centerXAnchor.constraint(equalTo: anchor).isActive = true
         }
     }
     
-    private func constrainSizetoSuperView(
-        view: UIView,
-        shouldUseWidth: Bool = true,
-        shouldUseHeight: Bool = true,
-        beSafe: Bool = true
-    ) {
-        guard let container = view.superview else {
+    func constrainSizetoSuperView(shouldUseWidth: Bool = true, shouldUseHeight: Bool = true, beSafe: Bool = true) {
+        guard let container = self.superview else {
             return
         }
         
         if shouldUseWidth {
             let anchor = beSafe ? container.safeAreaLayoutGuide.widthAnchor : container.widthAnchor
-            view.widthAnchor.constraint(equalTo: anchor).isActive = true
+            self.widthAnchor.constraint(equalTo: anchor).isActive = true
         }
         
         if shouldUseHeight {
             let anchor = beSafe ? container.safeAreaLayoutGuide.heightAnchor : container.heightAnchor
-            view.heightAnchor.constraint(equalTo: anchor).isActive = true
+            self.heightAnchor.constraint(equalTo: anchor).isActive = true
         }
     }
 }

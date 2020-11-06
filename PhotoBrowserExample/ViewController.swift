@@ -17,7 +17,7 @@ class ViewController: UIViewController {
             "https://swall.teahub.io/photos/small/228-2288856_puppy-wallpapers-for-iphone.jpg",
             "https://cdn.shortpixel.ai/client/q_glossy,ret_img,w_520/https://coolbrnd.com/wp-content/uploads/2019/12/1-w1Dpk9Ufui0-520x926.jpg"
         ]
-        let content: [PhotoPageContentRepresentable] = imagePaths.map { PhotoPageContent(imagePath: $0) }
+        let content: [PhotoPageContentRepresentable] = imagePaths.compactMap { try? PhotoPageContent(imagePath: $0) }
         let vc = PhotoBrowserViewController()
         vc.configure(content: content, startIndex: 3)
         present(vc, animated: true, completion: nil)

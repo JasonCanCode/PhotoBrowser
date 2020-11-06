@@ -72,6 +72,11 @@ open class PhotoBrowserViewController: UIViewController {
         update(mode: .paging)
     }
     
+    open override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        updateTitle()
+    }
+    
     // MARK: - Updating
     
     open func updateCurrentIndex(to index: Int) {
@@ -93,6 +98,16 @@ open class PhotoBrowserViewController: UIViewController {
             titleLabel.text = text
             updateToolBars(shouldShow: true, delay: 0.25)
         }
+    }
+
+    open func addToFooter(item: UIBarButtonItem) {
+        let hasButtons = bottomToolbar.items?.isEmpty == false
+        
+        if !hasButtons {
+            let spacer = UIBarButtonItem(barButtonSystemItem: .flexibleSpace, target: nil, action: nil)
+            bottomToolbar.items = [spacer]
+        }
+        bottomToolbar.items?.append(item)
     }
     
     private func update(mode: BrowserMode) {
@@ -210,10 +225,13 @@ open class PhotoBrowserViewController: UIViewController {
         
         for i in firstPreloadIndex...lastPreloadIndex {
             let contentItem = content[i]
+            let photoView = photoViews[i]
             
-            if photoViews[i].urlString != contentItem.imagePath {
+            if let image = contentItem.image {
+                photoView.image = image
+            } else if let path = contentItem.imagePath, photoViews[i].urlString != path {
                 photoViews[i].contentMode = .scaleAspectFit
-                photoViews[i].updateImage(fromURLString: contentItem.imagePath)
+                photoViews[i].updateImage(fromURLString: path)
             }
         }
     }
@@ -225,17 +243,10 @@ extension PhotoBrowserViewController: UIScrollViewDelegate {
     
     // MARK: - Paging
     
-    public func scrollViewDidEndDecelerating(_ scrollView: UIScrollView) {
+    public func scrollViewDidScroll(_ scrollView: UIScrollView) {
         let isPaging = scrollView.subviews.count > 1 && mode == .paging
-        var newIndex = currentPageIndex
-        
-        for (i, photoView) in photoViews.enumerated() {
-            if scrollView.contentOffset == photoView.frame.origin {
-                newIndex = i
-                break
-            }
-        }
-        
+        let newIndex = Int(round(scrollView.contentOffset.x / scrollView.frame.width))
+
         if isPaging, newIndex == currentPageIndex - 1 || newIndex == currentPageIndex + 1 {
             currentPageIndex = newIndex
         }
