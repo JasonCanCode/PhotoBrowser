@@ -19,6 +19,9 @@ open class PhotoBrowserViewController: UIViewController {
     public private(set) lazy var scrollView = createScrollView()
     public private(set) lazy var bottomToolbar = UIToolbar()
     
+    /// Replace with your own image loader if you like
+    public var imageLoader: ImageLoader = AsyncImageLoader.shared
+    
     public private(set) var currentPageIndex: Int = 0 {
         willSet {
             if newValue < photoViews.count {
@@ -33,11 +36,11 @@ open class PhotoBrowserViewController: UIViewController {
 
     private var content: [PhotoBrowserContentRepresentable] = [] {
         didSet {
-            photoViews = content.map { _ in AsyncImageView() }
+            photoViews = content.map { _ in UIImageView() }
         }
     }
-    private var photoViews: [AsyncImageView] = []
-    private var currentPhotoView: AsyncImageView?
+    private var photoViews: [UIImageView] = []
+    private var currentPhotoView: UIImageView?
     private var mode: BrowserMode = .zoom
     /// To prevent overlapping tool bar fade animations
     private var isTransitioningBars: Bool = false
@@ -136,6 +139,21 @@ open class PhotoBrowserViewController: UIViewController {
             bottomToolbar.items = [spacer]
         }
         bottomToolbar.items?.append(item)
+    }
+    
+    /// Used to populate image views with content. Override to provide your own async image loading.
+    open func updateImageView(_ imageView: UIImageView, with content: PhotoBrowserContentRepresentable) {
+        imageView.contentMode = .scaleAspectFit
+        
+        if let image = content.image {
+            imageView.image = image
+        } else if let path = content.imagePath {
+            imageLoader.updateImage(fromURLString: path, placeholderImage: content.placeholderImage) { newImage, _ in
+                if let newImage = newImage {
+                    imageView.image = newImage
+                }
+            }
+        }
     }
     
     private func update(mode: BrowserMode) {
@@ -259,15 +277,7 @@ open class PhotoBrowserViewController: UIViewController {
         let lastPreloadIndex = min(photoViews.count - 1, currentPageIndex + 2)
         
         for i in firstPreloadIndex...lastPreloadIndex {
-            let contentItem = content[i]
-            let photoView = photoViews[i]
-            
-            if let image = contentItem.image {
-                photoView.image = image
-            } else if let path = contentItem.imagePath, photoViews[i].urlString != path {
-                photoViews[i].contentMode = .scaleAspectFit
-                photoViews[i].updateImage(fromURLString: path)
-            }
+            updateImageView(photoViews[i], with: content[i])
         }
     }
 }

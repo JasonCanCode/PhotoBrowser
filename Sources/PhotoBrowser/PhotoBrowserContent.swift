@@ -38,7 +38,7 @@ public extension PhotoBrowserContentRepresentable {
     
     /// Must be defined if `imagePath` is not
     var image: UIImage? {
-        return AsyncImageLoader.imageFromCache(imagePath)
+        return AsyncImageLoader.shared.imageFromCache(imagePath)
     }
     
     // MARK: - Validation
