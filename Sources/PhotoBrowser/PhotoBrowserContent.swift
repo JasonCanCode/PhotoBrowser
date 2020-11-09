@@ -1,5 +1,5 @@
 //
-//  PhotoPageContent.swift
+//  PhotoBrowserContent.swift
 //  PhotoBrowserExample
 //
 //  Created by Jason Welch on 11/4/20.
@@ -13,15 +13,21 @@ import UIKit
 ///
 /// - Requires: Either `imagePath` or `image` must be defined to have a valid content object.
 public protocol PhotoBrowserContentRepresentable {
-    var imagePath: String? { get }
+    var imageURL: URL? { get }
     var image: UIImage? { get }
     var placeholderImage: UIImage? { get }
 }
 
 public extension PhotoBrowserContentRepresentable {
     
-    /// Must be defined if `image` is not
     var imagePath: String? {
+        return imageURL?.absoluteString
+    }
+    
+    // MARK: - Default Values
+    
+    /// Must be defined if `image` is not
+    var imageURL: URL? {
         return nil
     }
     
@@ -38,33 +44,36 @@ public extension PhotoBrowserContentRepresentable {
     // MARK: - Validation
     
     var isValid: Bool {
-        Self.validate(imagePath: imagePath, image: image)
+        Self.validate(imageURL: imageURL, image: image)
     }
     
-    static func validate(imagePath: String?, image: UIImage?) -> Bool {
-        if let path = imagePath {
-            return URL(string: path) != nil
-        } else {
-            return image != nil
-        }
+    static func validate(imageURL: URL?, image: UIImage?) -> Bool {
+        return imageURL != nil || image != nil
     }
 }
 
 /// An object to use directly if you don't have/need another object adopting `PhotoBrowserContentRepresentable` when using PhotoBrowser
-public struct PhotoPageContent: PhotoBrowserContentRepresentable {
-    public let imagePath: String?
+public struct PhotoBrowserContent: PhotoBrowserContentRepresentable {
+    public let imageURL: URL?
     public var image: UIImage?
     public let placeholderImage: UIImage?
     
     /// Create an object to provide content to a `PhotoBrowserViewController`
-    /// - Throws: Error if neither an `imagePath` nor `image` is provided.
-    public init(imagePath: String? = nil, image: UIImage? = nil, placeholderImage: UIImage? = nil) throws {
-        guard Self.validate(imagePath: imagePath, image: image) else {
+    /// - Throws: Error if neither an `imageURL` nor `image` is provided.
+    public init(imageURL: URL? = nil, image: UIImage? = nil, placeholderImage: UIImage? = nil) throws {
+        guard Self.validate(imageURL: imageURL, image: image) else {
             throw Err.invalid
         }
-        self.imagePath = imagePath
+        self.imageURL = imageURL
         self.image = image
         self.placeholderImage = placeholderImage
+    }
+    
+    /// Create an object to provide content to a `PhotoBrowserViewController`
+    /// - Throws: Error if neither an `imagePath` nor `image` is provided.
+    public init(imagePath: String? = nil, image: UIImage? = nil, placeholderImage: UIImage? = nil) throws {
+        let imageURL = URL(string: imagePath ?? "")
+        try self.init(imageURL: imageURL, image: image, placeholderImage: placeholderImage)
     }
     
     public enum Err: Error {
