@@ -96,7 +96,7 @@ open class PhotoBrowserViewController: UIViewController {
             navigationItem.title = text
         } else {
             titleLabel.text = text
-            updateToolBars(shouldShow: true, delay: 0.25)
+            updateToolBars(shouldShow: true)
         }
     }
 
@@ -127,7 +127,7 @@ open class PhotoBrowserViewController: UIViewController {
         }
     }
     
-    private func updateToolBars(shouldShow: Bool, delay: TimeInterval = 0) {
+    private func updateToolBars(shouldShow: Bool) {
         guard !isTransitioningBars else {
             return
         }
@@ -136,7 +136,7 @@ open class PhotoBrowserViewController: UIViewController {
         
         isTransitioningBars = true
         
-        UIView.animate(withDuration: 0.25, delay: delay, animations: { [weak self] in
+        UIView.animate(withDuration: 0.25, animations: { [weak self] in
             self?.headerView.alpha = shouldShowHeader ? 1 : 0
             self?.bottomToolbar.alpha = shouldShowFooter ? 1 : 0
         }, completion: { [weak self]  _ in
@@ -244,10 +244,23 @@ extension PhotoBrowserViewController: UIScrollViewDelegate {
     // MARK: - Paging
     
     public func scrollViewDidScroll(_ scrollView: UIScrollView) {
-        let isPaging = scrollView.subviews.count > 1 && mode == .paging
+        updatePageIndexIfNecessary()
+    }
+    
+    public func scrollViewDidEndDecelerating(_ scrollView: UIScrollView) {
+        updatePageIndexIfNecessary()
+    }
+    
+    private func updatePageIndexIfNecessary() {
         let newIndex = Int(round(scrollView.contentOffset.x / scrollView.frame.width))
+        
+        if mode == .paging,
+           scrollView.subviews.count > 1,
+           0 ..< content.count ~= newIndex,
+           newIndex == currentPageIndex - 1 || newIndex == currentPageIndex + 1,
+           !scrollView.isZooming,
+           !isTransitioningBars {
 
-        if isPaging, newIndex == currentPageIndex - 1 || newIndex == currentPageIndex + 1 {
             currentPageIndex = newIndex
         }
     }

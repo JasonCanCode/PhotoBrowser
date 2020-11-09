@@ -75,6 +75,7 @@ internal extension PhotoBrowserViewController {
         scrollView.delegate = self
         scrollView.minimumZoomScale = 1
         scrollView.maximumZoomScale = 10
+        scrollView.bouncesZoom = false
         return scrollView
     }
     
