@@ -16,6 +16,8 @@ public protocol PhotoBrowserContentRepresentable {
     var imagePath: String? { get }
     var image: UIImage? { get }
     var placeholderImage: UIImage? { get }
+    
+    func updateImageView(_ imageView: UIImageView)
 }
 
 public extension PhotoBrowserContentRepresentable {
@@ -46,6 +48,17 @@ public extension PhotoBrowserContentRepresentable {
             return URL(string: path) != nil
         } else {
             return image != nil
+        }
+    }
+    
+    // MARK: - Image Loading
+    
+    func updateImageView(_ imageView: UIImageView) {
+        if let image = image {
+            imageView.image = image
+        } else if let path = imagePath, let photoView = imageView as? AsyncImageView, photoView.urlString != path {
+            photoView.contentMode = .scaleAspectFit
+            photoView.updateImage(fromURLString: path, placeholderImage: placeholderImage)
         }
     }
 }
