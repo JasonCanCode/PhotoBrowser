@@ -31,7 +31,7 @@ open class PhotoBrowserViewController: UIViewController {
         }
     }
 
-    private var content: [PhotoPageContentRepresentable] = [] {
+    private var content: [PhotoBrowserContentRepresentable] = [] {
         didSet {
             photoViews = content.map { _ in AsyncImageView() }
         }
@@ -48,10 +48,16 @@ open class PhotoBrowserViewController: UIViewController {
     
     // MARK: - Setup
     
-    open func configure(content: [PhotoPageContentRepresentable], startIndex: Int = 0) {
+    open func configure(content: [PhotoBrowserContentRepresentable], startIndex: Int = 0) {
         guard !content.isEmpty else {
             return
         }
+        
+        // Make sure all content objects are valid
+        if content.lazy.first(where: { !$0.isValid }) != nil {
+            assertionFailure("All content objects must have either a image path or image")
+        }
+        
         loadViewIfNeeded()
         let index = min(startIndex, content.count - 1)
         
@@ -79,6 +85,8 @@ open class PhotoBrowserViewController: UIViewController {
     
     // MARK: - Updating
     
+    /// External access to updating the `currentPageIndex`
+    /// - Parameter index: New content page index
     open func updateCurrentIndex(to index: Int) {
         guard index < content.count else {
             return
@@ -87,6 +95,7 @@ open class PhotoBrowserViewController: UIViewController {
         configurePagingMode()
     }
     
+    /// Update the header/nav bar title to show which image within the collection the user is viewing (ex.  "5 of 32")
     open func updateTitle() {
         headerView.isHidden = hasNav
         
@@ -99,7 +108,9 @@ open class PhotoBrowserViewController: UIViewController {
             updateToolBars(shouldShow: true)
         }
     }
-
+    
+    /// Add items to a footer toolbar, such as a like button. These buttons will be right aligned.
+    /// - Parameter item: Button to be added to the far right of the footer tool bar.
     open func addToFooter(item: UIBarButtonItem) {
         let hasButtons = bottomToolbar.items?.isEmpty == false
         
@@ -146,12 +157,14 @@ open class PhotoBrowserViewController: UIViewController {
     
     // MARK: - Actions
     
-    @IBAction func viewTapped(_ sender: UITapGestureRecognizer) {
+    /// Show/hide header and/or footer when screen is tapped.
+    @IBAction open func viewTapped(_ sender: UITapGestureRecognizer) {
         let shouldShow = headerView.alpha == 1 ? false : true
         updateToolBars(shouldShow: shouldShow)
     }
     
-    @IBAction func viewDoubleTapped(_ sender: UITapGestureRecognizer) {
+    /// Zoom in/out with screen is double tapped.
+    @IBAction open func viewDoubleTapped(_ sender: UITapGestureRecognizer) {
         if scrollView.zoomScale == 1 {
             update(mode: .zoom)
             scrollView.setZoomScale(2.5, animated: true)
@@ -160,8 +173,13 @@ open class PhotoBrowserViewController: UIViewController {
         }
     }
     
+    /// Dismiss this PhotoBrowserViewController
     @IBAction open func close() {
-        dismiss(animated: true, completion: nil)
+        if let nav = navigationController {
+            nav.popViewController(animated: true)
+        } else {
+            dismiss(animated: true, completion: nil)
+        }
     }
     
     // MARK: - Configuration
