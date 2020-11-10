@@ -91,6 +91,15 @@ open class PhotoBrowserViewController: UIViewController {
         }
     }
     
+    open override func viewWillTransition(to size: CGSize, with coordinator: UIViewControllerTransitionCoordinator) {
+        super.viewWillTransition(to: size, with: coordinator)
+        
+        let index = currentPageIndex
+        coordinator.animate { [weak self] _ in
+            self?.updateCurrentIndex(to: index)
+        }
+    }
+    
     // MARK: - Updating
     
     /// External access to updating the `currentPageIndex`
