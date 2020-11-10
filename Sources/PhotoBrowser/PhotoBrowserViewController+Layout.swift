@@ -98,6 +98,15 @@ internal extension PhotoBrowserViewController {
         
         return button
     }
+    
+    func createCloseNavButton() -> UIBarButtonItem {
+        UIBarButtonItem(
+            title: "Close",
+            style: .plain,
+            target: self,
+            action: #selector(close)
+        )
+    }
 }
 
 private extension UIView {

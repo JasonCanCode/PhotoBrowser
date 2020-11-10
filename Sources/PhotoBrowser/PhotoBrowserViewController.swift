@@ -81,6 +81,14 @@ open class PhotoBrowserViewController: UIViewController {
     open override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         updateTitle()
+        
+        let needsCloseButton: Bool = navigationController != nil
+            && navigationItem.backBarButtonItem == nil
+            && navigationItem.leftBarButtonItem == nil
+
+        if needsCloseButton {
+            navigationItem.leftBarButtonItem = createCloseNavButton()
+        }
     }
     
     // MARK: - Updating
@@ -175,7 +183,7 @@ open class PhotoBrowserViewController: UIViewController {
     
     /// Dismiss this PhotoBrowserViewController
     @IBAction open func close() {
-        if let nav = navigationController {
+        if let nav = navigationController, nav.viewControllers.count > 1, nav.viewControllers.last == self {
             nav.popViewController(animated: true)
         } else {
             dismiss(animated: true, completion: nil)
