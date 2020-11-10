@@ -19,7 +19,8 @@ open class PhotoBrowserViewController: UIViewController {
     public private(set) lazy var scrollView = createScrollView()
     public private(set) lazy var bottomToolbar = UIToolbar()
     
-    /// Replace with your own image loader if you like
+    /// Replace with your own image loader if you like or if you'd rather the content serve as view models,
+    /// have them adopt the `ImageLoader` protocol and they will load their images instead.
     public var imageLoader: ImageLoader = AsyncImageLoader.shared
     
     public private(set) var currentPageIndex: Int = 0 {
@@ -142,16 +143,28 @@ open class PhotoBrowserViewController: UIViewController {
     }
     
     /// Used to populate image views with content. Override to provide your own async image loading.
+    ///
+    /// - If the content has an `image` value, the image view will be populated with that.
+    /// - Else ift the content is an `ImageLoader`, the image will be loaded asynchronously using that.
+    /// - Otherwise, the view controller's `ImageLoader` is used.
+    ///
+    /// - Parameters:
+    ///   - imageView: The image view to be populated with a content's image as it is available.
+    ///   - content: Provider of an image, or image loading, or path to use with another image loader.
     open func updateImageView(_ imageView: UIImageView, with content: PhotoBrowserContentRepresentable) {
         imageView.contentMode = .scaleAspectFit
         
         if let image = content.image {
             imageView.image = image
-        } else if let path = content.imagePath {
-            imageLoader.updateImage(fromURLString: path, placeholderImage: content.placeholderImage) { newImage, _ in
-                if let newImage = newImage {
-                    imageView.image = newImage
-                }
+            return
+        }
+        
+        // You can have the content provide its own image loading if you prefer
+        let loader = (content as? ImageLoader) ?? imageLoader
+
+        loader.updateImage(fromURLString: content.imagePath, placeholderImage: content.placeholderImage) { newImage, _ in
+            if let newImage = newImage {
+                imageView.image = newImage
             }
         }
     }
