@@ -75,6 +75,7 @@ internal extension PhotoBrowserViewController {
         scrollView.delegate = self
         scrollView.minimumZoomScale = 1
         scrollView.maximumZoomScale = 10
+        scrollView.bouncesZoom = false
         return scrollView
     }
     
@@ -96,6 +97,15 @@ internal extension PhotoBrowserViewController {
         button.addTarget(self, action: #selector(close), for: .touchUpInside)
         
         return button
+    }
+    
+    func createCloseNavButton() -> UIBarButtonItem {
+        UIBarButtonItem(
+            title: "Close",
+            style: .plain,
+            target: self,
+            action: #selector(close)
+        )
     }
 }
 

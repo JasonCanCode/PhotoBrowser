@@ -7,19 +7,39 @@
 
 import UIKit
 
-public enum AsyncImageError: Error {
-    case invalidURL
-    case downloadError(error: Error)
-    case faultyDataFromURL
-    case faultyImageFromData
+// MARK: - ImageLoader Protocol
+
+public typealias ImageLoaderHandler = (UIImage?, Error?) -> Void
+
+public protocol ImageLoader {
+    func updateImage(fromURLString urlString: String?, placeholderImage: UIImage?, completionHandler: @escaping ImageLoaderHandler)
+    func imageFromCache(_ urlString: String?) -> UIImage?
 }
 
-public typealias AsyncImageHandler = (UIImage?, AsyncImageError?) -> Void
+extension ImageLoader {
+    func updateImage(fromURL url: URL?, placeholderImage: UIImage? = nil, completionHandler: @escaping ImageLoaderHandler) {
+        updateImage(fromURLString: url?.absoluteString, placeholderImage: placeholderImage, completionHandler: completionHandler)
+    }
+    
+    func imageFromCache(_ url: URL?) -> UIImage? {
+        imageFromCache(url?.absoluteString)
+    }
+}
 
-public struct AsyncImageLoader {
-    static private var task: URLSessionDownloadTask?
-    static private var session = URLSession.shared
-    static private var imageCache = NSCache<AnyObject, UIImage>()
+// MARK: - AsyncImageLoader class
+
+public class AsyncImageLoader: ImageLoader {
+    private var task: URLSessionDownloadTask?
+    private var session: URLSession
+    private var imageCache: NSCache<AnyObject, UIImage>
+    
+    private(set) static var shared = AsyncImageLoader(session: URLSession.shared, imageCache: NSCache<AnyObject, UIImage>())
+    
+    init(session: URLSession, imageCache: NSCache<AnyObject, UIImage>) {
+        self.task = nil
+        self.session = session
+        self.imageCache = imageCache
+    }
 
     /**
      Load an image on a separate thread and use the result in a provided completion block.
@@ -28,10 +48,10 @@ public struct AsyncImageLoader {
      - parameter placeholderImage:  Optional image to apply using the provided completion handler while the desired image is loaded.
      - parameter completionHandler: A block that receives both a `UIImage` (on succuess) and an `AsyncImageError` (on failure).
      */
-    public static func updateImage(fromURLString urlString: String?, placeholderImage: UIImage? = nil, completionHandler: @escaping AsyncImageHandler) {
+    public func updateImage(fromURLString urlString: String?, placeholderImage: UIImage? = nil, completionHandler: @escaping ImageLoaderHandler) {
 
         // Threading for handlers
-        let completeWithError: (AsyncImageError) -> Void = { customError in
+        let completeWithError: (Err) -> Void = { customError in
             DispatchQueue.main.async {
                 completionHandler(nil, customError)
             }
@@ -65,7 +85,7 @@ public struct AsyncImageLoader {
             } else if let data = try? Data(contentsOf: url) {
 
                 if let img = UIImage(data: data) {
-                    imageCache.setObject(img, forKey: urlString as AnyObject)
+                    self.imageCache.setObject(img, forKey: urlString as AnyObject)
                     completeWithImage(img)
                 } else {
                     completeWithError(.faultyImageFromData)
@@ -86,12 +106,19 @@ public struct AsyncImageLoader {
 
      - returns: The matching image if it was successfully loaded
      */
-    public static func imageFromCache(_ urlString: String?) -> UIImage? {
+    public func imageFromCache(_ urlString: String?) -> UIImage? {
         guard let urlString = urlString else {
             return nil
         }
 
         return imageCache.object(forKey: urlString as AnyObject)
+    }
+    
+    public enum Err: Error {
+        case invalidURL
+        case downloadError(error: Error)
+        case faultyDataFromURL
+        case faultyImageFromData
     }
 }
 
