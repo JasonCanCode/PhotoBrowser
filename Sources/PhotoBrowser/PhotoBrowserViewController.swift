@@ -7,7 +7,8 @@
 
 import UIKit
 
-private enum BrowserMode {
+/// Represents an interaction mode the photo browser uses to optimize the layout
+public enum PhotoBrowserMode {
     case paging
     case zoom
 }
@@ -42,7 +43,7 @@ open class PhotoBrowserViewController: UIViewController {
     }
     private var photoViews: [UIImageView] = []
     private var currentPhotoView: UIImageView?
-    private var mode: BrowserMode = .zoom
+    private var mode: PhotoBrowserMode = .zoom
     /// To prevent overlapping tool bar fade animations
     private var isTransitioningBars: Bool = false
     
@@ -120,7 +121,7 @@ open class PhotoBrowserViewController: UIViewController {
     open func updateTitle() {
         headerView.isHidden = hasNav
         
-        let text = "\(currentPageIndex + 1) of \(content.count)"
+        let text = content.isEmpty ? "" : "\(currentPageIndex + 1) of \(content.count)"
         
         if hasNav {
             navigationItem.title = text
@@ -169,7 +170,9 @@ open class PhotoBrowserViewController: UIViewController {
         }
     }
     
-    private func update(mode: BrowserMode) {
+    /// A safe way to update the mode of interaction if possible.
+    /// - Parameter mode: Desired mode of interaction
+    public func update(mode: PhotoBrowserMode) {
         guard self.mode != mode else {
             return
         }
