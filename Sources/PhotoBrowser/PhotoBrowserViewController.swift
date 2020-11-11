@@ -62,15 +62,20 @@ open class PhotoBrowserViewController: UIViewController {
         if content.lazy.first(where: { !$0.isValid }) != nil {
             assertionFailure("All content objects must have either a image path or image")
         }
-        
+        let hasLoaded = isViewLoaded
         loadViewIfNeeded()
+        
         let index = min(startIndex, content.count - 1)
         
         self.content = content
         self.currentPageIndex = index
         self.currentPhotoView = photoViews[index]
         
-        configureZoomMode()
+        if hasLoaded {
+            configurePagingMode()
+        } else {
+            configureZoomMode()
+        }
     }
 
     open override func viewDidLoad() {
