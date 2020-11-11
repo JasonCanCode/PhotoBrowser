@@ -19,6 +19,10 @@ open class PhotoBrowserViewController: UIViewController {
     public private(set) lazy var scrollView = createScrollView()
     public private(set) lazy var bottomToolbar = UIToolbar()
     
+    /// Replace with your own image loader if you like or if you'd rather the content serve as view models,
+    /// have them adopt the `ImageLoader` protocol and they will load their images instead.
+    public var imageLoader: ImageLoader = AsyncImageLoader.shared
+    
     public private(set) var currentPageIndex: Int = 0 {
         willSet {
             if newValue < photoViews.count {
@@ -33,11 +37,11 @@ open class PhotoBrowserViewController: UIViewController {
 
     private var content: [PhotoBrowserContentRepresentable] = [] {
         didSet {
-            photoViews = content.map { _ in AsyncImageView() }
+            photoViews = content.map { _ in UIImageView() }
         }
     }
-    private var photoViews: [AsyncImageView] = []
-    private var currentPhotoView: AsyncImageView?
+    private var photoViews: [UIImageView] = []
+    private var currentPhotoView: UIImageView?
     private var mode: BrowserMode = .zoom
     /// To prevent overlapping tool bar fade animations
     private var isTransitioningBars: Bool = false
@@ -136,6 +140,33 @@ open class PhotoBrowserViewController: UIViewController {
             bottomToolbar.items = [spacer]
         }
         bottomToolbar.items?.append(item)
+    }
+    
+    /// Used to populate image views with content. Override to provide your own async image loading.
+    ///
+    /// - If the content has an `image` value, the image view will be populated with that.
+    /// - Else ift the content is an `ImageLoader`, the image will be loaded asynchronously using that.
+    /// - Otherwise, the view controller's `ImageLoader` is used.
+    ///
+    /// - Parameters:
+    ///   - imageView: The image view to be populated with a content's image as it is available.
+    ///   - content: Provider of an image, or image loading, or path to use with another image loader.
+    open func updateImageView(_ imageView: UIImageView, with content: PhotoBrowserContentRepresentable) {
+        imageView.contentMode = .scaleAspectFit
+        
+        if let image = content.image {
+            imageView.image = image
+            return
+        }
+        
+        // You can have the content provide its own image loading if you prefer
+        let loader = (content as? ImageLoader) ?? imageLoader
+
+        loader.updateImage(fromURLString: content.imagePath, placeholderImage: content.placeholderImage) { newImage, _ in
+            if let newImage = newImage {
+                imageView.image = newImage
+            }
+        }
     }
     
     private func update(mode: BrowserMode) {
@@ -259,15 +290,7 @@ open class PhotoBrowserViewController: UIViewController {
         let lastPreloadIndex = min(photoViews.count - 1, currentPageIndex + 2)
         
         for i in firstPreloadIndex...lastPreloadIndex {
-            let contentItem = content[i]
-            let photoView = photoViews[i]
-            
-            if let image = contentItem.image {
-                photoView.image = image
-            } else if let path = contentItem.imagePath, photoViews[i].urlString != path {
-                photoViews[i].contentMode = .scaleAspectFit
-                photoViews[i].updateImage(fromURLString: path)
-            }
+            updateImageView(photoViews[i], with: content[i])
         }
     }
 }

@@ -14,10 +14,10 @@ open class AsyncImageView: UIImageView {
         let placeholderImage = placeholderImage ?? self.image
         self.urlString = urlString
 
-        AsyncImageLoader.updateImage(fromURLString: urlString, placeholderImage: placeholderImage) { [weak self] newImage, _ in
+        AsyncImageLoader.shared.updateImage(fromURLString: urlString, placeholderImage: placeholderImage) { [weak self] newImage, _ in
             if let newImage = newImage {
                 // Use the most recently cached image of the stored urlString if available to avoid an issue with dequeued cells
-                self?.image = AsyncImageLoader.imageFromCache(self?.urlString) ?? newImage
+                self?.image = AsyncImageLoader.shared.imageFromCache(self?.urlString) ?? newImage
             }
         }
     }
