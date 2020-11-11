@@ -8,7 +8,7 @@
 import UIKit
 
 /// Represents an interaction mode the photo browser uses to optimize the layout
-public enum PhotoBrowserMode {
+private enum PhotoBrowserMode {
     case paging
     case zoom
 }
@@ -177,7 +177,7 @@ open class PhotoBrowserViewController: UIViewController {
     
     /// A safe way to update the mode of interaction if possible.
     /// - Parameter mode: Desired mode of interaction
-    public func update(mode: PhotoBrowserMode) {
+    private func update(mode: PhotoBrowserMode) {
         guard self.mode != mode else {
             return
         }
