@@ -8,7 +8,7 @@
 import UIKit
 
 /// Represents an interaction mode the photo browser uses to optimize the layout
-public enum PhotoBrowserMode {
+private enum PhotoBrowserMode {
     case paging
     case zoom
 }
@@ -62,15 +62,20 @@ open class PhotoBrowserViewController: UIViewController {
         if content.lazy.first(where: { !$0.isValid }) != nil {
             assertionFailure("All content objects must have either a image path or image")
         }
-        
+        let hasLoaded = isViewLoaded
         loadViewIfNeeded()
+        
         let index = min(startIndex, content.count - 1)
         
         self.content = content
         self.currentPageIndex = index
         self.currentPhotoView = photoViews[index]
         
-        configureZoomMode()
+        if hasLoaded {
+            configurePagingMode()
+        } else {
+            configureZoomMode()
+        }
     }
 
     open override func viewDidLoad() {
@@ -172,7 +177,7 @@ open class PhotoBrowserViewController: UIViewController {
     
     /// A safe way to update the mode of interaction if possible.
     /// - Parameter mode: Desired mode of interaction
-    public func update(mode: PhotoBrowserMode) {
+    private func update(mode: PhotoBrowserMode) {
         guard self.mode != mode else {
             return
         }
